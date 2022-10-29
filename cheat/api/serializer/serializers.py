@@ -6,21 +6,7 @@ from loguru import logger
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from rest_framework.validators import UniqueValidator
-from users.models import CustomUser, TaskMixin, ViewTask
-
-
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ["email"]
-
-
-class ViewTaskSerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source="user.email")
-
-    class Meta:
-        model = ViewTask
-        fields = "__all__"
+from users.models import CustomUser, SubscribeTask, TaskMixin, ViewTask
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -62,17 +48,32 @@ class RegisterSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = "__all__"
+        fields = ["email", "id"]
 
 
-class CreateViewTaskSerializer(serializers.ModelSerializer):
+class ViewTaskSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     begin_time = serializers.DateTimeField(required=False)
 
     def to_representation(self, instance):
         self.fields["user"] = UserSerializer(read_only=True)
-        return super(ProfileSerializer, self).to_representation(instance)
+        return super(ViewTaskSerializer, self).to_representation(instance)
 
     class Meta:
         model = ViewTask
         fields = "__all__"
+
+
+class GetSubTaskSerializer(serializers.ModelSerializer):
+    """Сериализатор для задания подписки"""
+
+    user = UserSerializer(read_only=True)
+
+    def to_representation(self, instance):
+        self.fields["user"] = UserSerializer(read_only=True)
+        return super(GetSubTaskSerializer, self).to_representation(instance)
+
+    class Meta:
+        model = SubscribeTask
+        # fields = "__all__"  # ["sub_type", "read_last_post", "user"]
+        exclude = ("gender_choice",)

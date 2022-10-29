@@ -6,15 +6,17 @@ from . import views
 router = routers.SimpleRouter()
 
 
-router.register("users", views.ProfileApiView)
-router.register("create-view-task", views.CreateViewTaskViewSet, basename="cutareadel")
+router.register(
+    "create-view-task", views.CreateViewTaskViewSet, basename="create_view_task"
+)
 
-router.register("test2", views.ViewTaskApi)
+router.register("tasks", views.ViewTaskApi)
+# router.register("all-tasks", views.GetAllTaskView)
 
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("test/", views.create_task, name="hihih"),
     path("register/", views.RegisterView.as_view(), name="auth_register"),
+    path("all-tasks/", views.GetAllTaskView.as_view(), name="auth_register"),
     path("", include("rest_framework.urls", namespace="rest_framework")),
 ]
