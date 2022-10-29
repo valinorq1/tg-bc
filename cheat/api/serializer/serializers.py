@@ -1,3 +1,5 @@
+from importlib.metadata import requires
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from loguru import logger
@@ -57,55 +59,20 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-class CreateViewTaskSerializer(serializers.ModelSerializer):
-    begin_time = serializers.DateTimeField(required=False)
-    # channel = serializers.CharField(required=False)
-
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ViewTask
+        model = CustomUser
         fields = "__all__"
 
-    def validate(self, attrs):
 
-        self.user = None
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
-            self.user = request.user
-            logger.debug(self.context["request"].user)
-        return attrs
+class CreateViewTaskSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    begin_time = serializers.DateTimeField(required=False)
 
-    def create(self, validated_data):
-        logger.debug(validated_data)
-        crt = ViewTask.objects.create(
-            channel=validated_data["channel"],
-            amount=validated_data["amount"],
-            processed_count=validated_data["processed_count"],
-            price=validated_data["price"],
-            duration=validated_data["duration"],
-            task_duration=validated_data["task_duration"],
-            subscription=validated_data["subscription"],
-            max_speed=validated_data["max_speed"],
-            viewed=validated_data["viewed"],
-            processed=validated_data["processed"],
-            begin_time="2022-10-22T17:55",
-            count_last_posts=validated_data["count_last_posts"],
-            count_per_post=validated_data["count_per_post"],
-            count_avg=validated_data["count_avg"],
-            user=self.user,
-        )
-        logger.debug(validated_data)
-        return True
-        """ user = CustomUser.objects.create(
-            email=validated_data["email"],
-        )
+    def to_representation(self, instance):
+        self.fields["user"] = UserSerializer(read_only=True)
+        return super(ProfileSerializer, self).to_representation(instance)
 
-        user.set_password(validated_data["password"])
-        user.save()
-
-        return user """
-
-
-class CreateViewTaskSerializer1(serializers.ModelSerializer):
     class Meta:
         model = ViewTask
         fields = "__all__"

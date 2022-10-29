@@ -41,7 +41,7 @@ class TaskMixin(models.Model):
     max_speed = models.BooleanField("Максимальная скорость", default=False)
     viewed = models.BooleanField("Просмотрен", default=False)
     processed = models.BooleanField("Обработан", default=False)
-    begin_time = models.DateTimeField("Время начала", default=timezone.now)
+    begin_time = models.DateTimeField("Время начала")
     update_time = models.DateTimeField("Время обновления", auto_now=True)
     creation_time = models.DateTimeField("Время создания", auto_now_add=True)
 

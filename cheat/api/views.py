@@ -10,7 +10,6 @@ from users.models import CustomUser, ViewTask
 
 from .serializer.serializers import (
     CreateViewTaskSerializer,
-    CreateViewTaskSerializer1,
     ProfileSerializer,
     RegisterSerializer,
     ViewTaskSerializer,
@@ -57,21 +56,18 @@ class ViewTaskApi(viewsets.ModelViewSet):
         return ViewTask.objects.filter(user=user)
 
 
-class CreateViewTaskView(generics.CreateAPIView):
-    """Создаём задачу: Просмотры"""
+class CreateViewTaskViewSet(viewsets.ModelViewSet):
+    """Добавляем задачу для клиента: Просмотры"""
 
-    queryset = CustomUser.objects.all()
-
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     serializer_class = CreateViewTaskSerializer
 
+    def get_queryset(self):
+        logger.debug(self.request.user)
+        return ViewTask.objects.filter(user=self.request.user)
 
-class CreateViewApi(APIView):
-    def post(self, request):
-        serializer = CreateViewTaskSerializer1(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-        return Response({"success": True})
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 class RegisterView(generics.CreateAPIView):
