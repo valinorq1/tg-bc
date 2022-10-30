@@ -48,6 +48,62 @@ class CreateViewTaskViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
+class CreateSubTaskViewSet(viewsets.ModelViewSet):
+    """Добавляем задачу для клиента: Просмотры"""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GetSubTaskSerializer
+    http_method_names = ["post"]
+
+    def get_queryset(self):
+        return SubscribeTask.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class CreateVoteTaskViewSet(viewsets.ModelViewSet):
+    """Добавляем задачу для клиента: Голосование"""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = VoteTaskSerializer
+    http_method_names = ["post"]
+
+    def get_queryset(self):
+        return VotingTask.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class CreateReactionTaskViewSet(viewsets.ModelViewSet):
+    """Добавляем задачу для клиента: Реакции"""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ReactionTaskSerializer
+    http_method_names = ["post"]
+
+    def get_queryset(self):
+        return ReactionTask.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class CreateCommentTaskViewSet(viewsets.ModelViewSet):
+    """Добавляем задачу для клиента: Сообщения"""
+
+    permission_classes = (IsAuthenticated,)
+    serializer_class = CommentTaskSerializer
+    http_method_names = ["post"]
+
+    def get_queryset(self):
+        return CommentTask.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
 class RegisterView(generics.CreateAPIView):
     """Регистрация пользователя"""
 
@@ -57,6 +113,8 @@ class RegisterView(generics.CreateAPIView):
 
 
 class GetAllTaskView(generics.ListAPIView):
+    """Получаем все активные задания пользователя"""
+
     serializer_sub_task = GetSubTaskSerializer
     serializer_view_task = ViewTaskSerializer
     serializer_comment_task = CommentTaskSerializer

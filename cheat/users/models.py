@@ -139,7 +139,8 @@ class ReactionTask(TaskMixin):
     )
     scatter = models.BooleanField("Разброс +- 5%", default=False)
     post = models.CharField("Ссылка на пост", max_length=120)
-    reactions = models.ManyToManyField(Reaction, null=True, blank=True)
+    # reactions = models.ManyToManyField(Reaction, null=True, blank=True)
+    emotion = models.JSONField(null=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
     class Meta:
