@@ -1,3 +1,4 @@
+from dataclasses import fields
 from importlib.metadata import requires
 
 from django.contrib.auth import get_user_model
@@ -6,7 +7,14 @@ from loguru import logger
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from rest_framework.validators import UniqueValidator
-from users.models import CustomUser, SubscribeTask, TaskMixin, ViewTask
+from users.models import (
+    CommentTask,
+    CustomUser,
+    SubscribeTask,
+    TaskMixin,
+    ViewTask,
+    VotingTask,
+)
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -75,5 +83,32 @@ class GetSubTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SubscribeTask
-        # fields = "__all__"  # ["sub_type", "read_last_post", "user"]
         exclude = ("gender_choice",)
+
+
+class CommentTaskSerializer(serializers.ModelSerializer):
+    """Сериализатор для задания комментариев"""
+
+    user = UserSerializer(read_only=True)
+
+    def to_representation(self, instance):
+        self.fields["user"] = UserSerializer(read_only=True)
+        return super(CommentTaskSerializer, self).to_representation(instance)
+
+    class Meta:
+        model = CommentTask
+        fields = "__all__"
+
+
+class VoteTaskSerializer(serializers.ModelSerializer):
+    """Сериализатор для задания голосования"""
+
+    user = UserSerializer(read_only=True)
+
+    def to_representation(self, instance):
+        self.fields["user"] = UserSerializer(read_only=True)
+        return super(VoteTaskSerializer, self).to_representation(instance)
+
+    class Meta:
+        model = VotingTask
+        fields = "__all__"
