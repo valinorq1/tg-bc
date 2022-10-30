@@ -118,3 +118,29 @@ class VotingTask(TaskMixin):
 
     class Meta:
         db_table = "voting_task"
+
+
+class Reaction(models.Model):
+    name = models.CharField("Эмоция", unique=True, max_length=32)
+    premium = models.BooleanField("Премиум", default=False)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = "reactions"
+
+
+class ReactionTask(TaskMixin):
+    """Задача: оставить реакцию на  пост"""
+
+    new_posts_count = models.IntegerField(
+        "Количесвто новых постов", null=True, blank=True
+    )
+    scatter = models.BooleanField("Разброс +- 5%", default=False)
+    post = models.CharField("Ссылка на пост", max_length=120)
+    reactions = models.ManyToManyField(Reaction, null=True, blank=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = "reactions_task"

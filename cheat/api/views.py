@@ -2,11 +2,19 @@ from loguru import logger
 from rest_framework import generics, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from users.models import CommentTask, CustomUser, SubscribeTask, ViewTask, VotingTask
+from users.models import (
+    CommentTask,
+    CustomUser,
+    ReactionTask,
+    SubscribeTask,
+    ViewTask,
+    VotingTask,
+)
 
 from .serializer.serializers import (
     CommentTaskSerializer,
     GetSubTaskSerializer,
+    ReactionTaskSerializer,
     RegisterSerializer,
     ViewTaskSerializer,
     VoteTaskSerializer,
@@ -53,6 +61,7 @@ class GetAllTaskView(generics.ListAPIView):
     serializer_view_task = ViewTaskSerializer
     serializer_comment_task = CommentTaskSerializer
     serializer_vote_task = VoteTaskSerializer
+    serializer_reaction_task = ReactionTaskSerializer
 
     permission_classes = (IsAuthenticated,)
 
@@ -68,6 +77,9 @@ class GetAllTaskView(generics.ListAPIView):
     def get_queryset_vote_task(self):
         return VotingTask.objects.filter(user=self.request.user)
 
+    def get_queryset_reaction_task(self):
+        return ReactionTask.objects.filter(user=self.request.user)
+
     def list(self, request, *args, **kwargs):
         view_t = self.serializer_view_task(self.get_queryset_views_task(), many=True)
         sub_t = self.serializer_sub_task(self.get_queryset_sub_task(), many=True)
@@ -75,11 +87,15 @@ class GetAllTaskView(generics.ListAPIView):
             self.get_queryset_comment_task(), many=True
         )
         vote_t = self.serializer_vote_task(self.get_queryset_vote_task(), many=True)
+        react_t = self.serializer_reaction_task(
+            self.get_queryset_reaction_task(), many=True
+        )
         return Response(
             {
                 "sub_task": sub_t.data,
                 "view_task": view_t.data,
                 "comment_task": com_t.data,
                 "vote_task": vote_t.data,
+                "react_task": react_t.data,
             }
         )

@@ -10,6 +10,7 @@ from rest_framework.validators import UniqueValidator
 from users.models import (
     CommentTask,
     CustomUser,
+    ReactionTask,
     SubscribeTask,
     TaskMixin,
     ViewTask,
@@ -111,4 +112,18 @@ class VoteTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = VotingTask
+        fields = "__all__"
+
+
+class ReactionTaskSerializer(serializers.ModelSerializer):
+    """Сериализатор для задания голосования"""
+
+    user = UserSerializer(read_only=True)
+
+    def to_representation(self, instance):
+        self.fields["user"] = UserSerializer(read_only=True)
+        return super(ReactionTaskSerializer, self).to_representation(instance)
+
+    class Meta:
+        model = ReactionTask
         fields = "__all__"
