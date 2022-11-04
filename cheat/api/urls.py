@@ -6,29 +6,18 @@ from . import views
 router = routers.SimpleRouter()
 
 
-router.register(
-    "create-view-task", views.CreateViewTaskViewSet, basename="create_view_task"
-)
-router.register(
-    "create-sub-task", views.CreateSubTaskViewSet, basename="create_sub_task"
-)
+router.register("view-task", views.ViewTaskViewSet, basename="view_task")
+router.register("sub-task", views.SubTaskViewSet, basename="create_sub_task")
 
+router.register("vote-task", views.VoteTaskViewSet, basename="create_vote_task")
 router.register(
-    "create-vote-task", views.CreateVoteTaskViewSet, basename="create_vote_task"
-)
-router.register(
-    "create-reaction-task",
-    views.CreateReactionTaskViewSet,
+    "reaction-task",
+    views.ReactionTaskViewSet,
     basename="create_reaction_task",
 )
 router.register(
-    "create-comment-task",
-    views.CreateCommentTaskViewSet,
-    basename="create_comment_task",
-)
-router.register(
-    "create-comment-task",
-    views.CreateCommentTaskViewSet,
+    "comment-task",
+    views.CommentTaskViewSet,
     basename="create_comment_task",
 )
 

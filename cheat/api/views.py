@@ -2,6 +2,7 @@ from loguru import logger
 from rest_framework import generics, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 from users.models import (
     CommentTask,
     CustomUser,
@@ -34,12 +35,16 @@ class ViewTaskApi(viewsets.ModelViewSet):
         return ViewTask.objects.filter(user=user)
 
 
-class CreateViewTaskViewSet(viewsets.ModelViewSet):
+class ViewTaskViewSet(viewsets.ModelViewSet):
     """Добавляем задачу для клиента: Просмотры"""
 
     permission_classes = (IsAuthenticated,)
     serializer_class = ViewTaskSerializer
-    http_method_names = ["post"]
+    http_method_names = [
+        "post",
+        "get",
+        "delete",
+    ]
 
     def get_queryset(self):
         return ViewTask.objects.filter(user=self.request.user)
@@ -47,13 +52,22 @@ class CreateViewTaskViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+        except:
+            return Response({"success": False})
 
-class CreateSubTaskViewSet(viewsets.ModelViewSet):
+        return Response({"success": True})
+
+
+class SubTaskViewSet(viewsets.ModelViewSet):
     """Добавляем задачу для клиента: Просмотры"""
 
     permission_classes = (IsAuthenticated,)
     serializer_class = GetSubTaskSerializer
-    http_method_names = ["post"]
+    http_method_names = ["post", "get", "delete"]
 
     def get_queryset(self):
         return SubscribeTask.objects.filter(user=self.request.user)
@@ -61,13 +75,22 @@ class CreateSubTaskViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+        except:
+            return Response({"success": False})
 
-class CreateVoteTaskViewSet(viewsets.ModelViewSet):
+        return Response({"success": True})
+
+
+class VoteTaskViewSet(viewsets.ModelViewSet):
     """Добавляем задачу для клиента: Голосование"""
 
     permission_classes = (IsAuthenticated,)
     serializer_class = VoteTaskSerializer
-    http_method_names = ["post"]
+    http_method_names = ["post", "get", "delete"]
 
     def get_queryset(self):
         return VotingTask.objects.filter(user=self.request.user)
@@ -75,13 +98,22 @@ class CreateVoteTaskViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+        except:
+            return Response({"success": False})
 
-class CreateReactionTaskViewSet(viewsets.ModelViewSet):
+        return Response({"success": True})
+
+
+class ReactionTaskViewSet(viewsets.ModelViewSet):
     """Добавляем задачу для клиента: Реакции"""
 
     permission_classes = (IsAuthenticated,)
     serializer_class = ReactionTaskSerializer
-    http_method_names = ["post"]
+    http_method_names = ["post", "get", "delete"]
 
     def get_queryset(self):
         return ReactionTask.objects.filter(user=self.request.user)
@@ -89,19 +121,37 @@ class CreateReactionTaskViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+        except:
+            return Response({"success": False})
 
-class CreateCommentTaskViewSet(viewsets.ModelViewSet):
+        return Response({"success": True})
+
+
+class CommentTaskViewSet(viewsets.ModelViewSet):
     """Добавляем задачу для клиента: Сообщения"""
 
     permission_classes = (IsAuthenticated,)
     serializer_class = CommentTaskSerializer
-    http_method_names = ["post"]
+    http_method_names = ["post", "get", "delete"]
 
     def get_queryset(self):
         return CommentTask.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+        except:
+            return Response({"success": False})
+
+        return Response({"success": True})
 
 
 class RegisterView(generics.CreateAPIView):
