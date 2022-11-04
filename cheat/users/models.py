@@ -27,7 +27,21 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     def __str__(self):
-        return f"{self.email} #{self.id}"
+        return f"{self.email} #{self.pk}"
+
+
+class TransactionHistory(models.Model):
+    user = models.ForeignKey(
+        CustomUser, on_delete=models.PROTECT, related_name="transactions"
+    )
+    creation_time = models.DateTimeField("Время создания", auto_now_add=True)
+    total_sum = models.IntegerField(null=False)
+
+    def __str__(self) -> str:
+        return f"{self.user.email} {self.total_sum}"
+
+    class Meta:
+        db_table = "transaction_history"
 
 
 class TaskMixin(models.Model):
@@ -71,7 +85,7 @@ class ViewTask(TaskMixin):
     count_avg = models.IntegerField("Среднее кол-во постов в день", default=False)
 
     def __str__(self) -> str:
-        return str(f"Задача: #{self.id} Клиент: {self.user.email}")
+        return str(f"Задача: #{self.pk} Клиент: {self.user.email}")
 
     class Meta:
         db_table = "view_task"
@@ -86,7 +100,7 @@ class SubscribeTask(TaskMixin):
     gender_choice = models.CharField(choices=GENDERS, max_length=120)
 
     def __str__(self) -> str:
-        return str(f"Задача: #{self.id} Клиент: {self.user.email}")
+        return str(f"Задача: #{self.pk} Клиент: {self.user.email}")
 
     class Meta:
         db_table = "sub_task"
@@ -99,7 +113,7 @@ class CommentTask(TaskMixin):
     comments = models.JSONField(null=True)
 
     def __str__(self) -> str:
-        return str(f"Задача: #{self.id} Клиент: {self.user.email}")
+        return str(f"Задача: #{self.pk} Клиент: {self.user.email}")
 
     class Meta:
         db_table = "comment_task"
@@ -114,7 +128,7 @@ class VotingTask(TaskMixin):
     posts = models.JSONField(null=True)
 
     def __str__(self) -> str:
-        return str(f"Задача: #{self.id} Клиент: {self.user.email}")
+        return str(f"Задача: #{self.pk} Клиент: {self.user.email}")
 
     class Meta:
         db_table = "voting_task"
