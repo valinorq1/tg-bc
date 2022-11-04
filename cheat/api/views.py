@@ -1,8 +1,8 @@
+from django.http import HttpResponse
 from loguru import logger
 from rest_framework import generics, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
 from users.models import (
     CommentTask,
     CustomUser,
@@ -20,6 +20,7 @@ from .serializer.serializers import (
     ViewTaskSerializer,
     VoteTaskSerializer,
 )
+from .tasks import test_func
 
 
 class ViewTaskApi(viewsets.ModelViewSet):
@@ -44,6 +45,7 @@ class ViewTaskViewSet(viewsets.ModelViewSet):
         "post",
         "get",
         "delete",
+        "put",
     ]
 
     def get_queryset(self):
@@ -60,6 +62,16 @@ class ViewTaskViewSet(viewsets.ModelViewSet):
             return Response({"success": False})
 
         return Response({"success": True})
+
+    def update(self, request, *args, **kwargs):
+        data_to_change = {"amount": request.data.get("amount")}
+        serializer = self.serializer_class(
+            instance=self.get_object(), data=data_to_change, partial=True
+        )
+        if serializer.is_valid():
+            self.perform_update(serializer)
+
+        return Response(serializer.data)
 
 
 class SubTaskViewSet(viewsets.ModelViewSet):
@@ -84,6 +96,16 @@ class SubTaskViewSet(viewsets.ModelViewSet):
 
         return Response({"success": True})
 
+    def update(self, request, *args, **kwargs):
+        data_to_change = {"amount": request.data.get("amount")}
+        serializer = self.serializer_class(
+            instance=self.get_object(), data=data_to_change, partial=True
+        )
+        if serializer.is_valid():
+            self.perform_update(serializer)
+
+        return Response(serializer.data)
+
 
 class VoteTaskViewSet(viewsets.ModelViewSet):
     """Добавляем задачу для клиента: Голосование"""
@@ -106,6 +128,16 @@ class VoteTaskViewSet(viewsets.ModelViewSet):
             return Response({"success": False})
 
         return Response({"success": True})
+
+    def update(self, request, *args, **kwargs):
+        data_to_change = {"amount": request.data.get("amount")}
+        serializer = self.serializer_class(
+            instance=self.get_object(), data=data_to_change, partial=True
+        )
+        if serializer.is_valid():
+            self.perform_update(serializer)
+
+        return Response(serializer.data)
 
 
 class ReactionTaskViewSet(viewsets.ModelViewSet):
@@ -130,6 +162,16 @@ class ReactionTaskViewSet(viewsets.ModelViewSet):
 
         return Response({"success": True})
 
+    def update(self, request, *args, **kwargs):
+        data_to_change = {"amount": request.data.get("amount")}
+        serializer = self.serializer_class(
+            instance=self.get_object(), data=data_to_change, partial=True
+        )
+        if serializer.is_valid():
+            self.perform_update(serializer)
+
+        return Response(serializer.data)
+
 
 class CommentTaskViewSet(viewsets.ModelViewSet):
     """Добавляем задачу для клиента: Сообщения"""
@@ -152,6 +194,16 @@ class CommentTaskViewSet(viewsets.ModelViewSet):
             return Response({"success": False})
 
         return Response({"success": True})
+
+    def update(self, request, *args, **kwargs):
+        data_to_change = {"amount": request.data.get("amount")}
+        serializer = self.serializer_class(
+            instance=self.get_object(), data=data_to_change, partial=True
+        )
+        if serializer.is_valid():
+            self.perform_update(serializer)
+
+        return Response(serializer.data)
 
 
 class RegisterView(generics.CreateAPIView):
@@ -207,3 +259,9 @@ class GetAllTaskView(generics.ListAPIView):
                 "react_task": react_t.data,
             }
         )
+
+
+def test_w(request):
+    logger.debug("asnjdhjdnbasjdbdhbhbd")
+    test_func.delay()  # type: ignore
+    return HttpResponse("done")
