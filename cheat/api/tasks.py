@@ -11,5 +11,6 @@ from users.models import CustomUser
 @shared_task(bind=True)
 def test_func(self):
     for i in range(100):
-        CustomUser.objects.create(email=f"vasdasd{i}@gmail.com", password="en1996ru")
+        print(f"{i}")
+        # CustomUser.objects.create(email=f"vasdasd{i}@gmail.com", password="en1996ru")
     return "DONE"
