@@ -26,6 +26,11 @@ router.register(
     views.CreateCommentTaskViewSet,
     basename="create_comment_task",
 )
+router.register(
+    "create-comment-task",
+    views.CreateCommentTaskViewSet,
+    basename="create_comment_task",
+)
 
 
 router.register("tasks", views.ViewTaskApi)
