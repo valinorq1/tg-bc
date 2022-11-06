@@ -1,6 +1,5 @@
 from celery import shared_task
-
-from users.models import CustomUser
+from loguru import logger
 
 # celery -A config.celery worker --loglevel=INFO
 # celery -A config.celery beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
@@ -11,8 +10,9 @@ from users.models import CustomUser
 
 
 @shared_task(bind=True)
-def test_func(self):
-    for i in range(100):
+def test_func(self, *args, **kwargs):
+    logger.debug(kwargs)
+    """ for i in range(100):
         print(f"{i}")
-        # CustomUser.objects.create(email=f"vasdasd{i}@gmail.com", password="en1996ru")
+        # CustomUser.objects.create(email=f"vasdasd{i}@gmail.com", password="en1996ru") """
     return "DONE"

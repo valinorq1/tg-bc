@@ -57,26 +57,6 @@ class ViewTaskViewSet(viewsets.ModelViewSet):
         return ViewTask.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        # logger.debug(self.request.data)
-        """name = {"name": "123123"}
-        if self.request.data.get("begin_time", None):
-            logger.debug(parser.parse(self.request.data.get("begin_time")))
-        else:
-            logger.debug("Без отложенного запуска")"""
-        """ schedule_time = parser.parse(self.request.data.get("begin_time"))
-        schedule, _ = CrontabSchedule.objects.get_or_create(
-            day_of_week=",".join(self.request.data.get("days_of_week", "5")),
-            minute=schedule_time.minute,
-            hour=schedule_time.hour,
-        )
-        new_celery_task = PeriodicTask.objects.update_or_create(
-            name=f"Schedule hit job for vallll",
-            defaults={
-                "task": "api.tasks.test_func",
-                "args": json.dumps([name]),
-                "crontab": schedule,
-            },
-        ) """
         serializer.save(user=self.request.user)
 
     def destroy(self, request, *args, **kwargs):

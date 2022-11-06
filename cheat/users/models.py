@@ -112,7 +112,7 @@ def create_view_task_schedule(sender, instance, **kwargs):
     }
 
     task_name = str(instance).replace("Задача:", "")
-    start_at = datetime.now() + timedelta(minutes=3)
+    start_at = datetime.now() + timedelta(seconds=20)
     """ minute = datetime.now().minute + 5
     hour = datetime.now().hour
     day_of_week = datetime.today().weekday()
@@ -146,7 +146,7 @@ def create_view_task_schedule(sender, instance, **kwargs):
         name=f"Просмотры: {task_name}",
         defaults={
             "task": "api.tasks.test_func",
-            # "args": json.dumps([args_for_sched]),
+            "kwargs": json.dumps(args_for_sched),
             "one_off": True,
             "clocked": clocked,
         },
