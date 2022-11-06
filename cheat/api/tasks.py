@@ -1,5 +1,8 @@
+from asgiref.sync import async_to_sync
 from celery import shared_task
 from loguru import logger
+from session.models import Session
+from users.models import CommentTask, ReactionTask, SubscribeTask, ViewTask, VotingTask
 
 # celery -A config.celery worker --loglevel=INFO
 # celery -A config.celery beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
@@ -10,9 +13,30 @@ from loguru import logger
 
 
 @shared_task(bind=True)
-def test_func(self, *args, **kwargs):
+def views_task(self, *args, **kwargs):
     logger.debug(kwargs)
-    """ for i in range(100):
-        print(f"{i}")
-        # CustomUser.objects.create(email=f"vasdasd{i}@gmail.com", password="en1996ru") """
-    return "DONE"
+    return "views_task DONE"
+
+
+@shared_task(bind=True)
+def vote_task(self, *args, **kwargs):
+    logger.debug(kwargs)
+    return "vote_task DONE"
+
+
+@shared_task(bind=True)
+def subscribe_task(self, *args, **kwargs):
+    logger.debug(kwargs)
+    return "subscribe_task DONE"
+
+
+@shared_task(bind=True)
+def comment_task(self, *args, **kwargs):
+    logger.debug(kwargs)
+    return "comment_task DONE"
+
+
+@shared_task(bind=True)
+def reaction_task(self, *args, **kwargs):
+    logger.debug(kwargs)
+    return "reaction_task DONE"

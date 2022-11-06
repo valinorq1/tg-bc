@@ -24,7 +24,6 @@ from .serializer.serializers import (
     ViewTaskSerializer,
     VoteTaskSerializer,
 )
-from .tasks import test_func
 
 
 class ViewTaskApi(viewsets.ModelViewSet):
@@ -264,9 +263,3 @@ class GetAllTaskView(generics.ListAPIView):
                 "react_task": react_t.data,
             }
         )
-
-
-def test_w(request):
-    logger.debug("asnjdhjdnbasjdbdhbhbd")
-    test_func.delay()  # type: ignore
-    return HttpResponse("done")

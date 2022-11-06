@@ -99,9 +99,8 @@ class ViewTask(TaskMixin):
 
 @receiver(post_save, sender=ViewTask)
 def create_view_task_schedule(sender, instance, **kwargs):
-    logger.debug(instance)
-    logger.debug(timezone.now())
     args_for_sched = {
+        "task_id": instance.id,
         "amount": instance.amount,
         "channel": instance.channel,
         "max_speed": instance.max_speed,
@@ -112,40 +111,17 @@ def create_view_task_schedule(sender, instance, **kwargs):
     }
 
     task_name = str(instance).replace("Задача:", "")
-    start_at = datetime.now() + timedelta(seconds=20)
-    """ minute = datetime.now().minute + 5
-    hour = datetime.now().hour
-    day_of_week = datetime.today().weekday()
-    day_of_month = datetime.now().date().day
-    month_of_year = datetime.now().date().month """
+    start_at = datetime.now() + timedelta(seconds=10)
 
     if instance.begin_time:
-        logger.debug("ОТЛОЖЕННЫЙ ЗАПУСК")
         start_at = instance.begin_time
-        """ minute = instance.begin_time.minute
-        hour = instance.begin_time.hour
-        day_of_week = instance.begin_time.today().weekday()
-        day_of_month = instance.begin_time.date().day
-        month_of_year = instance.begin_time.date().month """
-
-    else:
-        logger.debug("ЗАПУСКАЕМ СРАЗУ")
-
-    """ schedule, _ = CrontabSchedule.objects.get_or_create(
-        minute=minute,
-        hour=hour,
-        day_of_week=day_of_week,
-        day_of_month=day_of_month,
-        month_of_year=month_of_year,
-        timezone="Europe/Moscow",
-    ) """
 
     clocked = ClockedSchedule.objects.create(clocked_time=start_at)
 
     new_celery_task = PeriodicTask.objects.update_or_create(
         name=f"Просмотры: {task_name}",
         defaults={
-            "task": "api.tasks.test_func",
+            "task": "api.tasks.views_task",
             "kwargs": json.dumps(args_for_sched),
             "one_off": True,
             "clocked": clocked,
@@ -166,6 +142,38 @@ class SubscribeTask(TaskMixin):
 
     class Meta:
         db_table = "sub_task"
+
+
+@receiver(post_save, sender=ViewTask)
+def create_subscribe_task_schedule(sender, instance, **kwargs):
+    args_for_sched = {
+        "task_id": instance.id,
+        "amount": instance.amount,
+        "channel": instance.channel,
+        "max_speed": instance.max_speed,
+        "sub_duration": instance.duration if instance.duration else 0,
+        "subscription": True if instance.subscription else False,
+        "count_last_posts": instance.count_last_posts,
+        "count_per_post": instance.count_per_post,
+    }
+
+    task_name = str(instance).replace("Задача:", "")
+    start_at = datetime.now() + timedelta(seconds=10)
+
+    if instance.begin_time:
+        start_at = instance.begin_time
+
+    clocked = ClockedSchedule.objects.create(clocked_time=start_at)
+
+    new_celery_task = PeriodicTask.objects.update_or_create(
+        name=f"Подписка: {task_name}",
+        defaults={
+            "task": "api.tasks.subscribe_task",
+            "kwargs": json.dumps(args_for_sched),
+            "one_off": True,
+            "clocked": clocked,
+        },
+    )
 
 
 class CommentTask(TaskMixin):
