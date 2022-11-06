@@ -146,15 +146,18 @@ class SubscribeTask(TaskMixin):
 
 @receiver(post_save, sender=SubscribeTask)
 def create_subscribe_task_schedule(sender, instance, **kwargs):
+    logger.debug(instance.gender_choice)
+    duration = False
+    if instance.max_speed:
+        duration = True
     args_for_sched = {
         "task_id": instance.id,
         "amount": instance.amount,
         "channel": instance.channel,
         "max_speed": instance.max_speed,
-        "sub_duration": instance.duration if instance.duration else 0,
-        "subscription": True if instance.subscription else False,
-        "count_last_posts": instance.count_last_posts,
-        "count_per_post": instance.count_per_post,
+        "task_duration": duration,
+        "gender": instance.gender_choice,
+        "sub_type": instance.sub_type,
     }
 
     task_name = str(instance).replace("Задача:", "")
