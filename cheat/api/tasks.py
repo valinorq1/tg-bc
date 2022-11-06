@@ -1,4 +1,5 @@
 from celery import shared_task
+
 from users.models import CustomUser
 
 # celery -A config.celery worker --loglevel=INFO
@@ -6,6 +7,7 @@ from users.models import CustomUser
 # celery -A config worker --loglevel=info
 
 # FLOWER celery -A config flower --port=5554
+# DRAMATIQ
 
 
 @shared_task(bind=True)

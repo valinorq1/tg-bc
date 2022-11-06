@@ -1,9 +1,15 @@
+import json
 from datetime import datetime
 
+from dateutil import parser
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
+from loguru import logger
 
 from .managers import CustomUserManager
 
@@ -55,7 +61,7 @@ class TaskMixin(models.Model):
     max_speed = models.BooleanField("Максимальная скорость", default=False)
     viewed = models.BooleanField("Просмотрен", default=False)
     processed = models.BooleanField("Обработан", default=False)
-    begin_time = models.DateTimeField("Время начала")
+    begin_time = models.DateTimeField("Время начала", null=True, blank=True)
     update_time = models.DateTimeField("Время обновления", auto_now=True)
     creation_time = models.DateTimeField("Время создания", auto_now_add=True)
 
@@ -89,6 +95,46 @@ class ViewTask(TaskMixin):
 
     class Meta:
         db_table = "view_task"
+
+
+@receiver(post_save, sender=ViewTask)
+def create_task_schedule(sender, instance, **kwargs):
+    logger.debug(type(instance.begin_time))
+    """ logger.debug(dir(instance))
+
+    logger.debug(instance.id) """
+    logger.debug(instance.begin_time.date().day)
+    logger.debug(instance.begin_time.date().weekday())
+    logger.debug(instance.begin_time.date().day)
+    logger.debug(instance.begin_time.date().year)
+    logger.debug(instance.begin_time.date().month)
+    if instance.begin_time:
+        args_for_sched = {
+            "amount": instance.amount,
+            "channel": instance.channel,
+            "max_speed": instance.max_speed,
+            "sub_duration": instance.duration if instance.duration else 0,
+            "subscription": True if instance.subscription else False,
+            "count_last_posts": instance.count_last_posts,
+            "count_per_post": instance.count_per_post,
+        }
+        # schedule_time = parser.parse(instance.begin_time)
+        schedule, _ = CrontabSchedule.objects.get_or_create(
+            minute=instance.begin_time.minute,
+            hour=instance.begin_time.hour,
+            day_of_month=instance.begin_time.date().day,
+            month_of_year=instance.begin_time.date().month,
+        )
+        new_celery_task = PeriodicTask.objects.update_or_create(
+            name=f"views task {instance.id}",
+            defaults={
+                "task": "api.tasks.test_func",
+                "args": json.dumps([args_for_sched]),
+                "crontab": schedule,
+            },
+        )
+    else:
+        pass
 
 
 class SubscribeTask(TaskMixin):

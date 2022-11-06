@@ -1,4 +1,8 @@
+import json
+
+from dateutil import parser
 from django.http import HttpResponse
+from django_celery_beat.models import CrontabSchedule, PeriodicTask
 from loguru import logger
 from rest_framework import generics, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -48,10 +52,31 @@ class ViewTaskViewSet(viewsets.ModelViewSet):
         "put",
     ]
 
+    # begin_time:2020-07-10 15:00:00.000
     def get_queryset(self):
         return ViewTask.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
+        # logger.debug(self.request.data)
+        """name = {"name": "123123"}
+        if self.request.data.get("begin_time", None):
+            logger.debug(parser.parse(self.request.data.get("begin_time")))
+        else:
+            logger.debug("Без отложенного запуска")"""
+        """ schedule_time = parser.parse(self.request.data.get("begin_time"))
+        schedule, _ = CrontabSchedule.objects.get_or_create(
+            day_of_week=",".join(self.request.data.get("days_of_week", "5")),
+            minute=schedule_time.minute,
+            hour=schedule_time.hour,
+        )
+        new_celery_task = PeriodicTask.objects.update_or_create(
+            name=f"Schedule hit job for vallll",
+            defaults={
+                "task": "api.tasks.test_func",
+                "args": json.dumps([name]),
+                "crontab": schedule,
+            },
+        ) """
         serializer.save(user=self.request.user)
 
     def destroy(self, request, *args, **kwargs):
