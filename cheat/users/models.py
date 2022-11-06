@@ -144,7 +144,7 @@ class SubscribeTask(TaskMixin):
         db_table = "sub_task"
 
 
-@receiver(post_save, sender=ViewTask)
+@receiver(post_save, sender=SubscribeTask)
 def create_subscribe_task_schedule(sender, instance, **kwargs):
     args_for_sched = {
         "task_id": instance.id,
