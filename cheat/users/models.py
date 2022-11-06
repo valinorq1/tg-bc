@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from dateutil import parser
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -8,7 +8,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django_celery_beat.models import CrontabSchedule, PeriodicTask
+from django_celery_beat.models import ClockedSchedule, PeriodicTask
 from loguru import logger
 
 from .managers import CustomUserManager
@@ -98,43 +98,59 @@ class ViewTask(TaskMixin):
 
 
 @receiver(post_save, sender=ViewTask)
-def create_task_schedule(sender, instance, **kwargs):
-    logger.debug(type(instance.begin_time))
-    """ logger.debug(dir(instance))
+def create_view_task_schedule(sender, instance, **kwargs):
+    logger.debug(instance)
+    logger.debug(timezone.now())
+    args_for_sched = {
+        "amount": instance.amount,
+        "channel": instance.channel,
+        "max_speed": instance.max_speed,
+        "sub_duration": instance.duration if instance.duration else 0,
+        "subscription": True if instance.subscription else False,
+        "count_last_posts": instance.count_last_posts,
+        "count_per_post": instance.count_per_post,
+    }
 
-    logger.debug(instance.id) """
-    logger.debug(instance.begin_time.date().day)
-    logger.debug(instance.begin_time.date().weekday())
-    logger.debug(instance.begin_time.date().day)
-    logger.debug(instance.begin_time.date().year)
-    logger.debug(instance.begin_time.date().month)
+    task_name = str(instance).replace("Задача:", "")
+    start_at = datetime.now() + timedelta(minutes=3)
+    """ minute = datetime.now().minute + 5
+    hour = datetime.now().hour
+    day_of_week = datetime.today().weekday()
+    day_of_month = datetime.now().date().day
+    month_of_year = datetime.now().date().month """
+
     if instance.begin_time:
-        args_for_sched = {
-            "amount": instance.amount,
-            "channel": instance.channel,
-            "max_speed": instance.max_speed,
-            "sub_duration": instance.duration if instance.duration else 0,
-            "subscription": True if instance.subscription else False,
-            "count_last_posts": instance.count_last_posts,
-            "count_per_post": instance.count_per_post,
-        }
-        # schedule_time = parser.parse(instance.begin_time)
-        schedule, _ = CrontabSchedule.objects.get_or_create(
-            minute=instance.begin_time.minute,
-            hour=instance.begin_time.hour,
-            day_of_month=instance.begin_time.date().day,
-            month_of_year=instance.begin_time.date().month,
-        )
-        new_celery_task = PeriodicTask.objects.update_or_create(
-            name=f"views task {instance.id}",
-            defaults={
-                "task": "api.tasks.test_func",
-                "args": json.dumps([args_for_sched]),
-                "crontab": schedule,
-            },
-        )
+        logger.debug("ОТЛОЖЕННЫЙ ЗАПУСК")
+        start_at = instance.begin_time
+        """ minute = instance.begin_time.minute
+        hour = instance.begin_time.hour
+        day_of_week = instance.begin_time.today().weekday()
+        day_of_month = instance.begin_time.date().day
+        month_of_year = instance.begin_time.date().month """
+
     else:
-        pass
+        logger.debug("ЗАПУСКАЕМ СРАЗУ")
+
+    """ schedule, _ = CrontabSchedule.objects.get_or_create(
+        minute=minute,
+        hour=hour,
+        day_of_week=day_of_week,
+        day_of_month=day_of_month,
+        month_of_year=month_of_year,
+        timezone="Europe/Moscow",
+    ) """
+
+    clocked = ClockedSchedule.objects.create(clocked_time=start_at)
+
+    new_celery_task = PeriodicTask.objects.update_or_create(
+        name=f"Просмотры: {task_name}",
+        defaults={
+            "task": "api.tasks.test_func",
+            # "args": json.dumps([args_for_sched]),
+            "one_off": True,
+            "clocked": clocked,
+        },
+    )
 
 
 class SubscribeTask(TaskMixin):
