@@ -1,15 +1,14 @@
-import json
 from datetime import datetime, timedelta
 
-from dateutil import parser
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django_celery_beat.models import ClockedSchedule, PeriodicTask
 from loguru import logger
+
+from users.service.model_utils import create_task_schedule
 
 from .managers import CustomUserManager
 
@@ -52,6 +51,7 @@ class TransactionHistory(models.Model):
 
 class TaskMixin(models.Model):
     channel = models.CharField("Канал", max_length=120)
+    post_id = models.IntegerField(null=False)
     amount = models.IntegerField("Объем", default=0)
     processed_count = models.IntegerField("Выполненный объем", default=0)
     price = models.IntegerField("Стоимость", default=0)
@@ -69,17 +69,8 @@ class TaskMixin(models.Model):
         if self.amount:
             return float(self.processed_count) / self.amount * 100
 
-    @property
-    def class_name(self):
-        names = {
-            "ViewTask": "Просмотры",
-            "CommentTask": "Комментарии",
-            "SubscribeTask": "Подписка",
-            "VotingTask": "Голосование",
-            "ReactionTask": "Реакции",
-        }
-        name = self.__class__.__name__
-        return names.get(name, "Задача")
+    class Meta:
+        abstract = True
 
 
 class ViewTask(TaskMixin):
@@ -99,6 +90,7 @@ class ViewTask(TaskMixin):
 
 @receiver(post_save, sender=ViewTask)
 def create_view_task_schedule(sender, instance, **kwargs):
+    """view task task schedule creator"""
     args_for_sched = {
         "task_id": instance.id,
         "amount": instance.amount,
@@ -116,16 +108,11 @@ def create_view_task_schedule(sender, instance, **kwargs):
     if instance.begin_time:
         start_at = instance.begin_time
 
-    clocked = ClockedSchedule.objects.create(clocked_time=start_at)
-
-    new_celery_task = PeriodicTask.objects.update_or_create(
+    created = create_task_schedule(
         name=f"Просмотры: {task_name}",
-        defaults={
-            "task": "api.tasks.views_task",
-            "kwargs": json.dumps(args_for_sched),
-            "one_off": True,
-            "clocked": clocked,
-        },
+        start_time=start_at,
+        arguments=args_for_sched,
+        celery_task_name="views_task",
     )
 
 
@@ -146,6 +133,7 @@ class SubscribeTask(TaskMixin):
 
 @receiver(post_save, sender=SubscribeTask)
 def create_subscribe_task_schedule(sender, instance, **kwargs):
+    """sybscrube task schedule creator"""
     logger.debug(instance.gender_choice)
     duration = False
     if instance.max_speed:
@@ -156,6 +144,7 @@ def create_subscribe_task_schedule(sender, instance, **kwargs):
         "channel": instance.channel,
         "max_speed": instance.max_speed,
         "task_duration": duration,
+        "read_last_post": instance.read_last_post,
         "gender": instance.gender_choice,
         "sub_type": instance.sub_type,
     }
@@ -165,17 +154,11 @@ def create_subscribe_task_schedule(sender, instance, **kwargs):
 
     if instance.begin_time:
         start_at = instance.begin_time
-
-    clocked = ClockedSchedule.objects.create(clocked_time=start_at)
-
-    new_celery_task = PeriodicTask.objects.update_or_create(
+    created = create_task_schedule(
         name=f"Подписка: {task_name}",
-        defaults={
-            "task": "api.tasks.subscribe_task",
-            "kwargs": json.dumps(args_for_sched),
-            "one_off": True,
-            "clocked": clocked,
-        },
+        start_time=start_at,
+        arguments=args_for_sched,
+        celery_task_name="subscribe_task",
     )
 
 
@@ -190,6 +173,29 @@ class CommentTask(TaskMixin):
 
     class Meta:
         db_table = "comment_task"
+
+
+@receiver(post_save, sender=CommentTask)
+def create_comment_task_schedule(sender, instance, **kwargs):
+    """comment task schedule creator"""
+    args_for_sched = {
+        "task_id": instance.id,
+        "channel": instance.channel,
+        "post_id": instance.post_id,
+        "comment_list": instance.comments,
+    }
+
+    task_name = str(instance).replace("Задача:", "")
+    start_at = datetime.now() + timedelta(seconds=10)
+
+    if instance.begin_time:
+        start_at = instance.begin_time
+    created = create_task_schedule(
+        name=f"Комментарии: {task_name}",
+        start_time=start_at,
+        arguments=args_for_sched,
+        celery_task_name="comment_task",
+    )
 
 
 class VotingTask(TaskMixin):
