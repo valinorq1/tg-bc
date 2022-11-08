@@ -28,6 +28,7 @@ router.register("tasks", views.ViewTaskApi)
 urlpatterns = [
     path("", include(router.urls)),
     path("register/", views.RegisterView.as_view(), name="auth_register"),
+    path("simple/", views.simple, name="simple"),
     path("all-tasks/", views.GetAllTaskView.as_view(), name="auth_register"),
     path("", include("rest_framework.urls", namespace="rest_framework")),
 ]

@@ -7,23 +7,16 @@ from loguru import logger
 from rest_framework import generics, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from users.models import (
-    CommentTask,
-    CustomUser,
-    ReactionTask,
-    SubscribeTask,
-    ViewTask,
-    VotingTask,
-)
 
-from .serializer.serializers import (
-    CommentTaskSerializer,
-    GetSubTaskSerializer,
-    ReactionTaskSerializer,
-    RegisterSerializer,
-    ViewTaskSerializer,
-    VoteTaskSerializer,
-)
+from session.models import Channel, Session
+from users.models import (CommentTask, CustomUser, ReactionTask, SubscribeTask,
+                          ViewTask, VotingTask)
+
+from .serializer.serializers import (CommentTaskSerializer,
+                                     GetSubTaskSerializer,
+                                     ReactionTaskSerializer,
+                                     RegisterSerializer, ViewTaskSerializer,
+                                     VoteTaskSerializer)
 
 
 class ViewTaskApi(viewsets.ModelViewSet):
@@ -263,3 +256,20 @@ class GetAllTaskView(generics.ListAPIView):
                 "react_task": react_t.data,
             }
         )
+
+
+def simple(request):
+    #z = Session.objects.get(pk=1)
+    """ q = Channel.objects.get(pk=1)
+    logger.debug(q)
+    logger.debug(q.sub_to.all()) """
+    q = Session.objects.get(pk=1).subscribed_to.all()
+    logger.debug(q)
+    """ p1 = Channel(channel='The Python Journal')
+    
+    p1.save()
+    z.subscribed_to.add(p1)
+    z.save()
+    z = Session.objects.get(pk=1)
+    logger.debug(Session.subscribed_to) """
+    

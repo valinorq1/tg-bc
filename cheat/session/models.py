@@ -1,6 +1,17 @@
 from django.db import models
 
 
+class Channel(models.Model):
+    channel = models.CharField(max_length=128)
+    creation_time = models.DateTimeField("Время создания", auto_now_add=True)
+    
+    def __str__(self):
+        return self.channel
+    
+    class Meta:
+        db_table = "channel_list"
+    
+    
 class Session(models.Model):
     name = models.CharField("Имя сессии", max_length=120)
     app_id = models.IntegerField("app_id", null=False)
@@ -11,6 +22,8 @@ class Session(models.Model):
     is_busy = models.BooleanField(default=False)
     is_banned = models.BooleanField(default=False)
     banned_until = models.DateTimeField(null=True, blank=True)
+    
+    subscribed_to = models.ManyToManyField(Channel, related_name="sub_to")
 
     def __str__(self):
         return f"{self.name}"
