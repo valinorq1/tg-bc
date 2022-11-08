@@ -1,0 +1,16 @@
+
+
+
+.login-container {
+    background-color: #ebecee;
+    
+}
+
+
+#login_form {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0px 5px 10px 0px rgba(153, 153, 153, 0.5);
+   max-width: 520px;
+}
