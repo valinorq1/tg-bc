@@ -9,7 +9,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from session.models import Channel, Session
-from users.models import (CommentTask, CustomUser, ReactionTask, SubscribeTask,
+from tasks.models import (CommentTask, CustomUser, ReactionTask, SubscribeTask,
                           ViewTask, VotingTask)
 
 from .serializer.serializers import (CommentTaskSerializer,
@@ -49,6 +49,9 @@ class ViewTaskViewSet(viewsets.ModelViewSet):
         return ViewTask.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
+        logger.debug(self.request.data)
+        #if self.request.user.balance <
+        #balance = CustomUser.objects.get(pk=self.request.user.id)
         serializer.save(user=self.request.user)
 
     def destroy(self, request, *args, **kwargs):

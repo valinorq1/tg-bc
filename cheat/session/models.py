@@ -23,10 +23,17 @@ class Session(models.Model):
     is_banned = models.BooleanField(default=False)
     banned_until = models.DateTimeField(null=True, blank=True)
     
-    subscribed_to = models.ManyToManyField(Channel, related_name="sub_to")
+    subscribed_to = models.ManyToManyField(Channel, related_name="sub_to",  blank=True)
 
     def __str__(self):
         return f"{self.name}"
 
     class Meta:
         db_table = "session"
+
+
+""" class SubsribeUntil(models.Model):
+    channel = models.ForeignKey(Channel, related_name="sub_until", on_delete=models.CASCADE)
+    sub_until = models.DateTimeField(blank=True, null=True)
+    session =  """
+    
