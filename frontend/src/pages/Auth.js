@@ -1,11 +1,25 @@
 import { React, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from '../utils/API';
+
 const Authentication = () => {
     const navigate = useNavigate();
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     const [isActive, setActive] = useState(false);
+
+
+    /* useEffect(() => {
+        let token = localStorage.getItem('tkn')
+
+        API.post(`token/verify/`, { token }).then((response) => {
+            navigate("/profile");
+
+        }).catch(function (error) {
+            console.log("ERROR")
+            console.log(error);
+        });
+    }, []); */
 
 
 

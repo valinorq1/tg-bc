@@ -54,6 +54,7 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DATETIME_INPUT_FORMATS": [ISO_8601],
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json'
 }
 
 SIMPLE_JWT = {

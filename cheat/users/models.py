@@ -28,6 +28,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+    
+    
+    def get_user_base_data(self):
+        return f"{self.email} {self.balance}"
 
     objects = CustomUserManager()
 
@@ -78,8 +82,8 @@ class ViewTask(TaskMixin):
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     count_last_posts = models.IntegerField("Кол-во последних постов", default=0)
-    count_per_post = models.IntegerField("Объем на пост", default=False)
-    count_avg = models.IntegerField("Среднее кол-во постов в день", default=False)
+    count_per_post = models.IntegerField("Объем на пост", default=1)
+    count_avg = models.IntegerField("Среднее кол-во постов в день", default=0)
 
     def __str__(self) -> str:
         return str(f"Задача: #{self.pk} Клиент: {self.user.email}")

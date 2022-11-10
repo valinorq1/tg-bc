@@ -13,7 +13,7 @@ const ProfilePage = () => {
 
         API.get(`all-tasks/`).then((response) => {
             const responseTasks = response.data;
-
+            console.log(responseTasks);
             for (var key in responseTasks) {
                 total_task += responseTasks[key].length;
                 console.log(key, responseTasks[key].length);
