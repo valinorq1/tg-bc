@@ -7,7 +7,6 @@ from loguru import logger
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from rest_framework.validators import UniqueValidator
-
 from tasks.models import (CommentTask, CustomUser, ReactionTask, SubscribeTask,
                           TaskMixin, ViewTask, VotingTask)
 
@@ -65,7 +64,7 @@ class ViewTaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ViewTask
-        fields = ['id', 'channel', 'amount', 'count_last_posts', 'count_per_post',
+        fields = ['id', 'channel', 'amount', 'post_id', 'count_last_posts', 'count_per_post',
                   'count_avg', 'processed_count', 'price', 'duration', 'task_duration', 
                   'max_speed', 'processed', 'begin_time', 'user']
 

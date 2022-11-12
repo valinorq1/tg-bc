@@ -4,10 +4,8 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from loguru import logger
-
 from users.models import CustomUser
 
 from .service.model_utils import create_task_schedule
@@ -66,6 +64,7 @@ def create_view_task_schedule(sender, instance, **kwargs):
     args_for_sched = {
         "task_id": instance.id,
         "channel": instance.channel,
+        "post_id": instance.post_id,
         "max_speed": instance.max_speed,
         "subscription": True if instance.subscription else False,
         "sub_duration": instance.duration if instance.duration else 0,
@@ -117,7 +116,7 @@ def create_subscribe_task_schedule(sender, instance, **kwargs):
         "amount": instance.amount,
         "channel": instance.channel,
         "max_speed": instance.max_speed,
-        "task_duration": duration,
+        "task_duration": instance.task_duration, # время на выполнение задания
         "read_last_post": instance.read_last_post,
         "gender": instance.gender_choice,
         "sub_type": instance.sub_type,
